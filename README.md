@@ -22,7 +22,7 @@ John Brown 011212122
 Jack Spade 230947037
   Office 230947037
 
-The first number in your in your FPBX contact is used as a master contact number for erach contact name.  To see the rest of the numbers for that same contact name your need to click though Option>Detail on your phone to access them.
+The first number for each FPBX contact is used as the  master contact number for that contact name.  To see the rest of the numbers for that same contact name, you need to click though Option>Detail on your phone.
 
 1. Copy the file into /var/www/html/
 2. Change permissions to 655
