@@ -119,7 +119,7 @@ if (isset($extensions)) {
                 }
 
         echo "        <Telephone label=\"$extension[2]\">$extension[0]</Telephone>\n";
-        //default is the phone exactly as input in fpbx, change $extensions[0] to [2] if you want the E164 format as created by fpbx.
+        //default is the phone exactly as input in fpbx, change $extensions[0] to [3] (the second variable, not the first one) if you want the E164 format as created by fpbx.
         //To use E164, make sure you select the country for each number in each contact in FBX.
         //This feature is only available or external numbers, not internal contacts. 
 
