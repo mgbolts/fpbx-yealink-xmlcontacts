@@ -1,15 +1,21 @@
-
 <?php
 /*
 The purpose of this file is to read all the Contact Manager entries for the specified group
 and then output them in a Yealink Remote Address Book formatted XML syntax.
 
-Instructions on how to use the original script can be found here:
+Instructions on how to use can be found here:
 https://mangolassi.it/topic/18647/freepbx-contact-manager-to-yealink-address-book
 */
 
+// Please note that this file has been substantially amended to increase the functionality:
+// a) Group all numbers for a common display name
+// b) Sort the order by alpa on the display name
+// c) Add labels to each phone number
+// e) Use E164 number convention
+// f) Allow the number labels to be customized.
+
 // Edit this varibale to match the name of hte group in Contact Manager
-$contact_manager_group = "GrpName";
+$contact_manager_group = "User Manager Group";
 
 header("Content-Type: text/xml");
 
@@ -36,17 +42,59 @@ $db = DB::connect($datasource); // attempt connection
 
 $type="getAll";
 // This pulls every number in contact maanger that is part of the group specified by $contact_manager_group
-$results = $db->$type("SELECT cen.number, cge.displayname, cen.type FROM contactmanager_group_entries AS cge LEFT JOIN contactmanager_entry_numbers AS cen$
+$results = $db->$type("SELECT cen.number, cge.displayname, cen.type, cen.E164 FROM contactmanager_group_entries AS cge LEFT JOIN contactmanager_en$
 
 //dump the result into an array.
 foreach($results as $result){
-    $extensions[] = array($result[0],$result[1],$result[2]);
-}
+    // The if staements provide the ability to re-lable the phone number type as you wish.
+    // It also allows for setting the number display order to be changed for multi-number contacts.
+
+    $sortorder = 0;
+
+    if ($result[2] == "cell") {
+        $result[2] = "Mobile";  // this is the label that will display on the phone
+        $sortorder = 3;  // change this number to change its order in the list
+    }
+
+    if ($result[2] == "internal") {
+        $result[2] = "Extension";  // this is the label that will display on the phone
+        $sortorder = 1;  // change this number to change its order in the list
+    }
+
+    if ($result[2] == "work") {
+        $result[2] = "Work";  // this is the label that will display on the phone
+        $sortorder = 2;  // change this number to change its order in the list
+    }
+
+    if ($result[2] == "other") {
+        $result[2] = "Other";   // this is the label that will display on the phone
+        $sortorder = 4;  // change this number to change its order in the list
+    }
+
+    if ($result[2] == "home") {
+        $result[2] = "Home";   // this is the label that will display on the phone
+        $sortorder = 5;  // change this number to change its order in the list
+    }
+
+// This sorts the extensions array by two fields, the display name and then the sort order field
+// To change the sort order of the labels, change the sort order number in the if statements above..
+
+    $dname = array();
+    $order = array();
+    for ($i = 0; $i < count($extensions); $i++) {
+        $dname[] = $extensions[$i][1];
+        $sorder[] = $extensions[$i][4];
+        }
+    // now apply sort
+    array_multisort($dname, SORT_ASC,
+                    $sorder, SORT_ASC, SORT_NUMERIC,
+                    $extensions);
 
 // output the XML header info
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 // Output the XML root. This tag must be in the format XXXIPPhoneDirectory
 // You may change the word Company below, but no other part of the root tag.
+
 $previousdispname = "";
 $firstloopflag = 1;
 echo "<CompanyIPPhoneDirectory  clearlight=\"true\">\n";
@@ -54,6 +102,8 @@ $index = 0;
 if (isset($extensions)) {
     // Loop through the results and output them correctly.
     // Spacing is setup below in case you wish to look at the result in a browser.
+
+
     foreach ($extensions as $key=>$extension) {
         $index= $index + 1;
 
@@ -75,7 +125,9 @@ if (isset($extensions)) {
     }
 }
 // Output the closing tag of the root. If you changed it above, make sure you change it here.
-
+                
 echo "    </DirectoryEntry>\n";
 echo "</CompanyIPPhoneDirectory>\n";
 ?>
+
+                      
