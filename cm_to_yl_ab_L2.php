@@ -42,7 +42,7 @@ $db = DB::connect($datasource); // attempt connection
 
 $type="getAll";
 // This pulls every number in contact maanger that is part of the group specified by $contact_manager_group
-$results = $db->$type("SELECT cen.number, cge.displayname, cen.type, cen.E164 FROM contactmanager_group_entries AS cge LEFT JOIN contactmanager_en$
+$results = $db->$type("SELECT cen.number, cge.displayname, cen.type, cen E164 FROM contactmanager_group_entries AS cge LEFT JOIN contactmanager_entry_numbers AS cen ON cen.entryid = cge.id WHERE cge.groupid = (SELECT cg.id FROM contactmanager_groups AS cg WHERE cg.name = '$contact_manager_group') ORDER BY cge.displayname ASC;", null);
 
 //dump the result into an array.
 foreach($results as $result){
